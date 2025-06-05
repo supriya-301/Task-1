@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fstBus Booking</title>
+<style>
+  
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #83a4d4, #b6fbff);
+  }
+  button {
+    cursor: pointer;
+  }
+
+  
+  #landing {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-transform: uppercase;
+  }
+  #landing h1 {
+    font-size: 4rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    text-shadow: 0 0 10px rgba(0,123,255,0.7);
+  }
+  #landing button {
+    font-size: 1.5rem;
+    padding: 15px 50px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+    transition: background 0.3s ease;
+  }
+  #landing button:hover {
+    background: linear-gradient(135deg, #0056b3, #0099cc);
+  }
+
+  #bookingContainer {
+  display: none;
+  width: 400px;
+  margin: 40px auto;
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(115, 123, 255, 0.4);
+  border: 1px solid #6f9dfd;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#bookingContainer:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 40px rgba(70, 130, 255, 0.8);
+}
+
+
+  h2, h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+
+  button.book-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button.book-btn:hover {
+    background-color: #0056b3;
+  }
+
+  #confirmation {
+    margin-top: 20px;
+    background-color: #e9ffe9;
+    padding: 15px;
+    border-left: 4px solid #28a745;
+    border-radius: 5px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+</style>
+</head>
+<body>
+
+  
+  <div id="landing">
+    <h1>fstBus Booking</h1>
+    <button id="loginBtn">BOOK NOW</button>
+  </div>
+
+  
+  <div id="bookingContainer">
+    <h1>Book Your Bus Ticket</h1>
+    <form id="bookingForm">
+      <div class="form-group">
+        <label for="from">From:</label>
+        <select id="from" required>
+          <option value="">Select</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Bangalore">Bangalore</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Kolkata">Kolkata</option>
+          <option value="Lucknow">Lucknow</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="to">To:</label>
+        <select id="to" required>
+          <option value="">Select</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Bangalore">Bangalore</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Kolkata">Kolkata</option>
+          <option value="Lucknow">Lucknow</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date of Journey:</label>
+        <input type="date" id="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="seats">Number of Tickets:</label>
+        <input type="number" id="seats" min="1" max="10" required>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price per Ticket (INR):</label>
+        <input type="number" id="price" value="500" readonly>
+      </div>
+
+      <button class="book-btn" type="submit">Book Now</button>
+    </form>
+
+    <div id="confirmation" class="hidden">
+      <h2>Booking Confirmed!</h2>
+      <p id="bookingDetails"></p>
+    </div>
+  </div>
+
+  <script>
+    const priceMap = {
+      "Delhi-Mumbai": 600,
+      "Mumbai-Delhi": 600,
+      "Delhi-Bangalore": 900,
+      "Bangalore-Delhi": 900,
+      "Mumbai-Bangalore": 750,
+      "Bangalore-Mumbai": 750,
+      "Mumbai-Chennai": 1000,
+      "Chennai-Mumbai": 1000,
+      "Mumbai-Kolkata": 1250,
+      "Kolkata-Mumbai": 1250,
+      "Mumbai-Lucknow": 850,
+      "Lucknow-Mumbai": 850,
+      "Delhi-Chennai": 1200,
+      "Mumbai-Delhi": 1200,
+      "Delhi-Kolkata": 1000,
+      "Kolkata-Delhi": 1000,
+      "Delhi-Lucknow": 800,
+      "Lucknow-Delhi": 800,
+      "Chennai-Bangalore": 500,
+      "Bangalore-Chennai": 500,
+      "Bangalore-Lucknow": 1050,
+      "Lucknow-Bangalore": 1050,
+      "Bangalore-Kolkata": 1350,
+      "Kolkata-Bangalore": 1350,
+      "Chennai-Lucknow": 1500,
+      "Lucknow-Chennai": 1500,
+      "Kolkata-Lucknow": 1250,
+      "Lucknow-Kolkata": 1250,
+      "Chennai-Kolkata": 1450,
+      "Kolkata-Chennai": 1450
+    };
+
+    function updatePrice() {
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      const key = `${from}-${to}`;
+      const price = priceMap[key] || 500;
+      document.getElementById('price').value = price;
+    }
+
+    document.getElementById('from').addEventListener('change', updatePrice);
+    document.getElementById('to').addEventListener('change', updatePrice);
+
+    document.getElementById('bookingForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      const date = document.getElementById('date').value;
+      const seats = parseInt(document.getElementById('seats').value);
+      const price = parseInt(document.getElementById('price').value);
+      const total = seats * price;
+
+      if (from === to) {
+        alert('Source and destination cannot be the same.');
+        return;
+      }
+
+      const details = `From: ${from}\nTo: ${to}\nDate: ${date}\nTickets: ${seats}\nPrice per Ticket: ₹${price}\nTotal Amount: ₹${total}`;
+      document.getElementById('bookingDetails').innerText = details;
+      document.getElementById('confirmation').classList.remove('hidden');
+
+      console.log('Booking Details:', { from, to, date, seats, price, total });
+    });
+
+    // Login button click shows booking form and hides landing page
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      document.getElementById('landing').style.display = 'none';
+      document.getElementById('bookingContainer').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
